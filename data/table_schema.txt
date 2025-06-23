@@ -1,0 +1,702 @@
+Chroma DB version: 1.0.12
+Found 71 tables.
+
+Table: SalesTaxRate
+Schema: CREATE TABLE "SalesTaxRate" (
+"SalesTaxRateID" INTEGER,
+  "StateProvinceID" INTEGER,
+  "TaxType" INTEGER,
+  "TaxRate" REAL,
+  "Name" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: PersonCreditCard
+Schema: CREATE TABLE "PersonCreditCard" (
+"BusinessEntityID" INTEGER,
+  "CreditCardID" INTEGER,
+  "ModifiedDate" TIMESTAMP
+)
+Table: PersonPhone
+Schema: CREATE TABLE "PersonPhone" (
+"BusinessEntityID" INTEGER,
+  "PhoneNumber" TEXT,
+  "PhoneNumberTypeID" INTEGER,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesTerritory
+Schema: CREATE TABLE "SalesTerritory" (
+"TerritoryID" INTEGER,
+  "Name" TEXT,
+  "CountryRegionCode" TEXT,
+  "Group" TEXT,
+  "SalesYTD" REAL,
+  "SalesLastYear" REAL,
+  "CostYTD" REAL,
+  "CostLastYear" REAL,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: PhoneNumberType
+Schema: CREATE TABLE "PhoneNumberType" (
+"PhoneNumberTypeID" INTEGER,
+  "Name" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Product
+Schema: CREATE TABLE "Product" (
+"ProductID" INTEGER,
+  "Name" TEXT,
+  "ProductNumber" TEXT,
+  "MakeFlag" INTEGER,
+  "FinishedGoodsFlag" INTEGER,
+  "Color" TEXT,
+  "SafetyStockLevel" INTEGER,
+  "ReorderPoint" INTEGER,
+  "StandardCost" REAL,
+  "ListPrice" REAL,
+  "Size" TEXT,
+  "SizeUnitMeasureCode" TEXT,
+  "WeightUnitMeasureCode" TEXT,
+  "Weight" REAL,
+  "DaysToManufacture" INTEGER,
+  "ProductLine" TEXT,
+  "Class" TEXT,
+  "Style" TEXT,
+  "ProductSubcategoryID" REAL,
+  "ProductModelID" REAL,
+  "SellStartDate" TIMESTAMP,
+  "SellEndDate" TIMESTAMP,
+  "DiscontinuedDate" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesTerritoryHistory
+Schema: CREATE TABLE "SalesTerritoryHistory" (
+"BusinessEntityID" INTEGER,
+  "TerritoryID" INTEGER,
+  "StartDate" TIMESTAMP,
+  "EndDate" TIMESTAMP,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ScrapReason
+Schema: CREATE TABLE "ScrapReason" (
+"ScrapReasonID" INTEGER,
+  "Name" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Shift
+Schema: CREATE TABLE "Shift" (
+"ShiftID" INTEGER,
+  "Name" TEXT,
+  "StartTime" TIME,
+  "EndTime" TIME,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductCategory
+Schema: CREATE TABLE "ProductCategory" (
+"ProductCategoryID" INTEGER,
+  "Name" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ShipMethod
+Schema: CREATE TABLE "ShipMethod" (
+"ShipMethodID" INTEGER,
+  "Name" TEXT,
+  "ShipBase" REAL,
+  "ShipRate" REAL,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductCostHistory
+Schema: CREATE TABLE "ProductCostHistory" (
+"ProductID" INTEGER,
+  "StartDate" TIMESTAMP,
+  "EndDate" TIMESTAMP,
+  "StandardCost" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductDescription
+Schema: CREATE TABLE "ProductDescription" (
+"ProductDescriptionID" INTEGER,
+  "Description" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ShoppingCartItem
+Schema: CREATE TABLE "ShoppingCartItem" (
+"ShoppingCartItemID" INTEGER,
+  "ShoppingCartID" TEXT,
+  "Quantity" INTEGER,
+  "ProductID" INTEGER,
+  "DateCreated" TIMESTAMP,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductDocument
+Schema: CREATE TABLE "ProductDocument" (
+"ProductID" INTEGER,
+  "DocumentNode" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: DatabaseLog
+Schema: CREATE TABLE "DatabaseLog" (
+"DatabaseLogID" INTEGER,
+  "PostTime" TIMESTAMP,
+  "DatabaseUser" TEXT,
+  "Event" TEXT,
+  "Schema" TEXT,
+  "Object" TEXT,
+  "TSQL" TEXT,
+  "XmlEvent" TEXT
+)
+Table: ProductInventory
+Schema: CREATE TABLE "ProductInventory" (
+"ProductID" INTEGER,
+  "LocationID" INTEGER,
+  "Shelf" TEXT,
+  "Bin" INTEGER,
+  "Quantity" INTEGER,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SpecialOffer
+Schema: CREATE TABLE "SpecialOffer" (
+"SpecialOfferID" INTEGER,
+  "Description" TEXT,
+  "DiscountPct" REAL,
+  "Type" TEXT,
+  "Category" TEXT,
+  "StartDate" TIMESTAMP,
+  "EndDate" TIMESTAMP,
+  "MinQty" INTEGER,
+  "MaxQty" REAL,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ErrorLog
+Schema: CREATE TABLE "ErrorLog" (
+"ErrorLogID" TEXT,
+  "ErrorTime" TEXT,
+  "UserName" TEXT,
+  "ErrorNumber" TEXT,
+  "ErrorSeverity" TEXT,
+  "ErrorState" TEXT,
+  "ErrorProcedure" TEXT,
+  "ErrorLine" TEXT,
+  "ErrorMessage" TEXT
+)
+Table: ProductListPriceHistory
+Schema: CREATE TABLE "ProductListPriceHistory" (
+"ProductID" INTEGER,
+  "StartDate" TIMESTAMP,
+  "EndDate" TIMESTAMP,
+  "ListPrice" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Address
+Schema: CREATE TABLE "Address" (
+"AddressID" INTEGER,
+  "AddressLine1" TEXT,
+  "AddressLine2" TEXT,
+  "City" TEXT,
+  "StateProvinceID" INTEGER,
+  "PostalCode" TEXT,
+  "SpatialLocation" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SpecialOfferProduct
+Schema: CREATE TABLE "SpecialOfferProduct" (
+"SpecialOfferID" INTEGER,
+  "ProductID" INTEGER,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductModel
+Schema: CREATE TABLE "ProductModel" (
+"ProductModelID" INTEGER,
+  "Name" TEXT,
+  "CatalogDescription" TEXT,
+  "Instructions" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: AddressType
+Schema: CREATE TABLE "AddressType" (
+"AddressTypeID" INTEGER,
+  "Name" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: StateProvince
+Schema: CREATE TABLE "StateProvince" (
+"StateProvinceID" INTEGER,
+  "StateProvinceCode" TEXT,
+  "CountryRegionCode" TEXT,
+  "IsOnlyStateProvinceFlag" INTEGER,
+  "Name" TEXT,
+  "TerritoryID" INTEGER,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductModelIllustration
+Schema: CREATE TABLE "ProductModelIllustration" (
+"ProductModelID" INTEGER,
+  "IllustrationID" INTEGER,
+  "ModifiedDate" TIMESTAMP
+)
+Table: AWBuildVersion
+Schema: CREATE TABLE "AWBuildVersion" (
+"SystemInformationID" INTEGER,
+  "Database Version" TEXT,
+  "VersionDate" TIMESTAMP,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductModelProductDescriptionCulture
+Schema: CREATE TABLE "ProductModelProductDescriptionCulture" (
+"ProductModelID" INTEGER,
+  "ProductDescriptionID" INTEGER,
+  "CultureID" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: BillOfMaterials
+Schema: CREATE TABLE "BillOfMaterials" (
+"BillOfMaterialsID" INTEGER,
+  "ProductAssemblyID" REAL,
+  "ComponentID" INTEGER,
+  "StartDate" TIMESTAMP,
+  "EndDate" TIMESTAMP,
+  "UnitMeasureCode" TEXT,
+  "BOMLevel" INTEGER,
+  "PerAssemblyQty" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Store
+Schema: CREATE TABLE "Store" (
+"BusinessEntityID" INTEGER,
+  "Name" TEXT,
+  "SalesPersonID" INTEGER,
+  "Demographics" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductPhoto
+Schema: CREATE TABLE "ProductPhoto" (
+"ProductPhotoID" INTEGER,
+  "ThumbNailPhoto" TEXT,
+  "ThumbnailPhotoFileName" TEXT,
+  "LargePhoto" TEXT,
+  "LargePhotoFileName" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductProductPhoto
+Schema: CREATE TABLE "ProductProductPhoto" (
+"ProductID" INTEGER,
+  "ProductPhotoID" INTEGER,
+  "Primary" INTEGER,
+  "ModifiedDate" TIMESTAMP
+)
+Table: TransactionHistory
+Schema: CREATE TABLE "TransactionHistory" (
+"TransactionID" INTEGER,
+  "ProductID" INTEGER,
+  "ReferenceOrderID" INTEGER,
+  "ReferenceOrderLineID" INTEGER,
+  "TransactionDate" TIMESTAMP,
+  "TransactionType" TEXT,
+  "Quantity" INTEGER,
+  "ActualCost" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductReview
+Schema: CREATE TABLE "ProductReview" (
+"ProductReviewID" INTEGER,
+  "ProductID" INTEGER,
+  "ReviewerName" TEXT,
+  "ReviewDate" TIMESTAMP,
+  "EmailAddress" TEXT,
+  "Rating" INTEGER,
+  "Comments" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: BusinessEntity
+Schema: CREATE TABLE "BusinessEntity" (
+"BusinessEntityID" INTEGER,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: TransactionHistoryArchive
+Schema: CREATE TABLE "TransactionHistoryArchive" (
+"TransactionID" INTEGER,
+  "ProductID" INTEGER,
+  "ReferenceOrderID" INTEGER,
+  "ReferenceOrderLineID" INTEGER,
+  "TransactionDate" TIMESTAMP,
+  "TransactionType" TEXT,
+  "Quantity" INTEGER,
+  "ActualCost" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductSubcategory
+Schema: CREATE TABLE "ProductSubcategory" (
+"ProductSubcategoryID" INTEGER,
+  "ProductCategoryID" INTEGER,
+  "Name" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: BusinessEntityAddress
+Schema: CREATE TABLE "BusinessEntityAddress" (
+"BusinessEntityID" INTEGER,
+  "AddressID" INTEGER,
+  "AddressTypeID" INTEGER,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ProductVendor
+Schema: CREATE TABLE "ProductVendor" (
+"ProductID" INTEGER,
+  "BusinessEntityID" INTEGER,
+  "AverageLeadTime" INTEGER,
+  "StandardPrice" REAL,
+  "LastReceiptCost" REAL,
+  "LastReceiptDate" TIMESTAMP,
+  "MinOrderQty" INTEGER,
+  "MaxOrderQty" INTEGER,
+  "OnOrderQty" REAL,
+  "UnitMeasureCode" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: BusinessEntityContact
+Schema: CREATE TABLE "BusinessEntityContact" (
+"BusinessEntityID" INTEGER,
+  "PersonID" INTEGER,
+  "ContactTypeID" INTEGER,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: UnitMeasure
+Schema: CREATE TABLE "UnitMeasure" (
+"UnitMeasureCode" TEXT,
+  "Name" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Vendor
+Schema: CREATE TABLE "Vendor" (
+"BusinessEntityID" INTEGER,
+  "AccountNumber" TEXT,
+  "Name" TEXT,
+  "CreditRating" INTEGER,
+  "PreferredVendorStatus" INTEGER,
+  "ActiveFlag" INTEGER,
+  "PurchasingWebServiceURL" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: ContactType
+Schema: CREATE TABLE "ContactType" (
+"ContactTypeID" INTEGER,
+  "Name" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: CountryRegionCurrency
+Schema: CREATE TABLE "CountryRegionCurrency" (
+"CountryRegionCode" TEXT,
+  "CurrencyCode" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: CountryRegion
+Schema: CREATE TABLE "CountryRegion" (
+"CountryRegionCode" TEXT,
+  "Name" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: WorkOrder
+Schema: CREATE TABLE "WorkOrder" (
+"WorkOrderID" INTEGER,
+  "ProductID" INTEGER,
+  "OrderQty" INTEGER,
+  "StockedQty" INTEGER,
+  "ScrappedQty" INTEGER,
+  "StartDate" TIMESTAMP,
+  "EndDate" TIMESTAMP,
+  "DueDate" TIMESTAMP,
+  "ScrapReasonID" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: PurchaseOrderDetail
+Schema: CREATE TABLE "PurchaseOrderDetail" (
+"PurchaseOrderID" INTEGER,
+  "PurchaseOrderDetailID" INTEGER,
+  "DueDate" TIMESTAMP,
+  "OrderQty" INTEGER,
+  "ProductID" INTEGER,
+  "UnitPrice" REAL,
+  "LineTotal" REAL,
+  "ReceivedQty" REAL,
+  "RejectedQty" REAL,
+  "StockedQty" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: CreditCard
+Schema: CREATE TABLE "CreditCard" (
+"CreditCardID" INTEGER,
+  "CardType" TEXT,
+  "CardNumber" TEXT,
+  "ExpMonth" INTEGER,
+  "ExpYear" INTEGER,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Culture
+Schema: CREATE TABLE "Culture" (
+"CultureID" TEXT,
+  "Name" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: WorkOrderRouting
+Schema: CREATE TABLE "WorkOrderRouting" (
+"WorkOrderID" INTEGER,
+  "ProductID" INTEGER,
+  "OperationSequence" INTEGER,
+  "LocationID" INTEGER,
+  "ScheduledStartDate" TIMESTAMP,
+  "ScheduledEndDate" TIMESTAMP,
+  "ActualStartDate" TIMESTAMP,
+  "ActualEndDate" TIMESTAMP,
+  "ActualResourceHrs" REAL,
+  "PlannedCost" REAL,
+  "ActualCost" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Currency
+Schema: CREATE TABLE "Currency" (
+"CurrencyCode" TEXT,
+  "Name" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: PurchaseOrderHeader
+Schema: CREATE TABLE "PurchaseOrderHeader" (
+"PurchaseOrderID" INTEGER,
+  "RevisionNumber" INTEGER,
+  "Status" INTEGER,
+  "EmployeeID" INTEGER,
+  "VendorID" INTEGER,
+  "ShipMethodID" INTEGER,
+  "OrderDate" TIMESTAMP,
+  "ShipDate" TIMESTAMP,
+  "SubTotal" REAL,
+  "TaxAmt" REAL,
+  "Freight" REAL,
+  "TotalDue" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: CurrencyRate
+Schema: CREATE TABLE "CurrencyRate" (
+"CurrencyRateID" INTEGER,
+  "CurrencyRateDate" TIMESTAMP,
+  "FromCurrencyCode" TEXT,
+  "ToCurrencyCode" TEXT,
+  "AverageRate" REAL,
+  "EndOfDayRate" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Customer
+Schema: CREATE TABLE "Customer" (
+"CustomerID" INTEGER,
+  "PersonID" REAL,
+  "StoreID" REAL,
+  "TerritoryID" INTEGER,
+  "AccountNumber" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Department
+Schema: CREATE TABLE "Department" (
+"DepartmentID" INTEGER,
+  "Name" TEXT,
+  "GroupName" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Document
+Schema: CREATE TABLE "Document" (
+"DocumentNode" TEXT,
+  "DocumentLevel" INTEGER,
+  "Title" TEXT,
+  "Owner" INTEGER,
+  "FolderFlag" INTEGER,
+  "FileName" TEXT,
+  "FileExtension" TEXT,
+  "Revision" TEXT,
+  "ChangeNumber" INTEGER,
+  "Status" INTEGER,
+  "DocumentSummary" TEXT,
+  "Document" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesOrderDetail
+Schema: CREATE TABLE "SalesOrderDetail" (
+"SalesOrderID" INTEGER,
+  "SalesOrderDetailID" INTEGER,
+  "CarrierTrackingNumber" TEXT,
+  "OrderQty" INTEGER,
+  "ProductID" INTEGER,
+  "SpecialOfferID" INTEGER,
+  "UnitPrice" REAL,
+  "UnitPriceDiscount" REAL,
+  "LineTotal" REAL,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: EmailAddress
+Schema: CREATE TABLE "EmailAddress" (
+"BusinessEntityID" INTEGER,
+  "EmailAddressID" INTEGER,
+  "EmailAddress" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Employee
+Schema: CREATE TABLE "Employee" (
+"BusinessEntityID" INTEGER,
+  "NationalIDNumber" TEXT,
+  "LoginID" TEXT,
+  "OrganizationNode" TEXT,
+  "OrganizationLevel" REAL,
+  "JobTitle" TEXT,
+  "BirthDate" DATE,
+  "MaritalStatus" TEXT,
+  "Gender" TEXT,
+  "HireDate" DATE,
+  "SalariedFlag" INTEGER,
+  "VacationHours" INTEGER,
+  "SickLeaveHours" INTEGER,
+  "CurrentFlag" INTEGER,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesOrderHeader
+Schema: CREATE TABLE "SalesOrderHeader" (
+"SalesOrderID" INTEGER,
+  "RevisionNumber" INTEGER,
+  "OrderDate" TIMESTAMP,
+  "DueDate" TIMESTAMP,
+  "ShipDate" TIMESTAMP,
+  "Status" INTEGER,
+  "OnlineOrderFlag" INTEGER,
+  "SalesOrderNumber" TEXT,
+  "PurchaseOrderNumber" TEXT,
+  "AccountNumber" TEXT,
+  "CustomerID" INTEGER,
+  "SalesPersonID" REAL,
+  "TerritoryID" INTEGER,
+  "BillToAddressID" INTEGER,
+  "ShipToAddressID" INTEGER,
+  "ShipMethodID" INTEGER,
+  "CreditCardID" REAL,
+  "CreditCardApprovalCode" TEXT,
+  "CurrencyRateID" REAL,
+  "SubTotal" REAL,
+  "TaxAmt" REAL,
+  "Freight" REAL,
+  "TotalDue" REAL,
+  "Comment" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: EmployeeDepartmentHistory
+Schema: CREATE TABLE "EmployeeDepartmentHistory" (
+"BusinessEntityID" INTEGER,
+  "DepartmentID" INTEGER,
+  "ShiftID" INTEGER,
+  "StartDate" DATE,
+  "EndDate" DATE,
+  "ModifiedDate" TIMESTAMP
+)
+Table: EmployeePayHistory
+Schema: CREATE TABLE "EmployeePayHistory" (
+"BusinessEntityID" INTEGER,
+  "RateChangeDate" TIMESTAMP,
+  "Rate" REAL,
+  "PayFrequency" INTEGER,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesOrderHeaderSalesReason
+Schema: CREATE TABLE "SalesOrderHeaderSalesReason" (
+"SalesOrderID" INTEGER,
+  "SalesReasonID" INTEGER,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesPerson
+Schema: CREATE TABLE "SalesPerson" (
+"BusinessEntityID" INTEGER,
+  "TerritoryID" REAL,
+  "SalesQuota" REAL,
+  "Bonus" REAL,
+  "CommissionPct" REAL,
+  "SalesYTD" REAL,
+  "SalesLastYear" REAL,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Illustration
+Schema: CREATE TABLE "Illustration" (
+"IllustrationID" INTEGER,
+  "Diagram" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: JobCandidate
+Schema: CREATE TABLE "JobCandidate" (
+"JobCandidateID" INTEGER,
+  "BusinessEntityID" REAL,
+  "Resume" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Location
+Schema: CREATE TABLE "Location" (
+"LocationID" INTEGER,
+  "Name" TEXT,
+  "CostRate" REAL,
+  "Availability" REAL,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Password
+Schema: CREATE TABLE "Password" (
+"BusinessEntityID" INTEGER,
+  "PasswordHash" TEXT,
+  "PasswordSalt" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesPersonQuotaHistory
+Schema: CREATE TABLE "SalesPersonQuotaHistory" (
+"BusinessEntityID" INTEGER,
+  "QuotaDate" TIMESTAMP,
+  "SalesQuota" REAL,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: Person
+Schema: CREATE TABLE "Person" (
+"BusinessEntityID" INTEGER,
+  "PersonType" TEXT,
+  "NameStyle" INTEGER,
+  "Title" TEXT,
+  "FirstName" TEXT,
+  "MiddleName" TEXT,
+  "LastName" TEXT,
+  "Suffix" TEXT,
+  "EmailPromotion" INTEGER,
+  "AdditionalContactInfo" TEXT,
+  "Demographics" TEXT,
+  "rowguid" TEXT,
+  "ModifiedDate" TIMESTAMP
+)
+Table: SalesReason
+Schema: CREATE TABLE "SalesReason" (
+"SalesReasonID" INTEGER,
+  "Name" TEXT,
+  "ReasonType" TEXT,
+  "ModifiedDate" TIMESTAMP
+)

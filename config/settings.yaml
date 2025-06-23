@@ -1,0 +1,12 @@
+gemini:
+  api_key: "AIzaSyDHcvphByso6-vFz79UmBamIbpZpcXmSZU"
+db_path: data/adventureworks_exported.db
+persist_dir: vector_store/adventureworks/chroma_data
+collection_name: adventureworks_schema
+embedding_model: all-mpnet-base-v2
+batch_size: 10
+# db_path: data/adventureworks_exported.db
+# persist_dir: vector_store/adventureworks/chroma_data
+# collection_name: adventureworks_schema
+# embedding_model: all-mpnet-base-v2
+# batch_size: 10
