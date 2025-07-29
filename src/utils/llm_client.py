@@ -291,3 +291,73 @@ def get_table_name_and_alter(client, nl_text):
     except Exception as e:
         logger.error(f"Error calling enhanced Gemini API: {e}")
         raise
+import requests  # Add this import at the top if not present
+
+# New function for initializing Codestral client
+def init_codestral_client(config_path):
+    config = load_config(config_path)
+    try:
+        api_key = config['mistral']['api_key']
+        logger.info("Initialized Codestral client")
+        return api_key
+    except Exception as e:
+        logger.error(f"Failed to initialize Codestral client: {e}")
+        raise
+
+# New function to generate SQL using Codestral
+@retry.Retry(
+    predicate=retry.if_exception_type(DeadlineExceeded, ServiceUnavailable),
+    initial=60,
+    maximum=600,
+    multiplier=2,
+    deadline=300
+)
+def generate_sql_with_codestral(api_key, nl_text, schema, sql_command_type, extracted_entities):
+    """Generate SQL query using Mistral Codestral API."""
+    cache_file = f"cache/sql_{hash(nl_text + schema)}.pkl"
+    if os.path.exists(cache_file):
+        with open(cache_file, 'rb') as f:
+            logger.info(f"Loaded cached SQL for: {nl_text}")
+            return pickle.load(f)
+
+    logger.info(f"Calling Codestral API for SQL generation: {nl_text}")
+    prompt = f"""
+    Given the natural language query: "{nl_text}"
+    Detected command type: {sql_command_type}
+    Relevant entities: {', '.join(extracted_entities)}
+    Table schema:
+    {schema}
+    
+    Generate a valid SQL query that matches the query intent. Use the exact column and table names from the schema. 
+    If it's a SELECT, include appropriate WHERE clauses. Do not execute; just return the SQL string.
+    For complex queries, consider joins if multiple tables are in the schema.
+    Output only the SQL query in a code block.
+    """
+
+    try:
+        response = requests.post(
+            "https://api.mistral.ai/v1/chat/completions",  # Codestral endpoint
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": "codestral-latest",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 500,
+                "temperature": 0.2
+            }
+        )
+        response.raise_for_status()
+        result = response.json()["choices"][0]["message"]["content"].strip()
+        
+        # Extract SQL from code block if present
+        sql_match = re.search(r'``````', result, re.DOTALL)
+        sql_query = sql_match.group(1).strip() if sql_match else result
+        
+        # Cache result
+        os.makedirs("cache", exist_ok=True)
+        with open(cache_file, 'wb') as f:
+            pickle.dump(sql_query, f)
+        
+        return sql_query
+    except Exception as e:
+        logger.error(f"Error calling Codestral API: {e}")
+        return "SELECT * FROM table -- Error generating SQL"
