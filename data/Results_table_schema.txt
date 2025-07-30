@@ -1,0 +1,134 @@
+3_batch_AIML_Results
+
+ cid                 name type  notnull dflt_value  pk
+   0                regno TEXT        0       None   0
+   1                 name TEXT        0       None   0
+   2             semester TEXT        0       None   0
+   3  DECEMBER - 2023 gpa REAL        0       None   0
+   4 APRIL / MAY 2024 gpa REAL        0       None   0
+   5    AUGUST - 2024 gpa REAL        0       None   0
+   6  FEBRUARY - 2025 gpa REAL        0       None   0
+   7              avg gpa REAL        0       None   0
+
+3_batch_CSD_Results
+
+ cid                 name type  notnull dflt_value  pk
+   0                regno TEXT        0       None   0
+   1                 name TEXT        0       None   0
+   2             semester TEXT        0       None   0
+   3  DECEMBER - 2023 gpa REAL        0       None   0
+   4 APRIL / MAY 2024 gpa REAL        0       None   0
+   5    AUGUST - 2024 gpa REAL        0       None   0
+   6  FEBRUARY - 2025 gpa REAL        0       None   0
+   7       Only batch gpa REAL        0       None   0
+   8              avg gpa REAL        0       None   0
+
+3_batch_AIDS_Results
+
+ cid                 name type  notnull dflt_value  pk
+   0                regno TEXT        0       None   0
+   1                 name TEXT        0       None   0
+   2             semester TEXT        0       None   0
+   3  DECEMBER - 2023 gpa REAL        0       None   0
+   4 APRIL / MAY 2024 gpa REAL        0       None   0
+   5    AUGUST - 2024 gpa REAL        0       None   0
+   6  FEBRUARY - 2025 gpa REAL        0       None   0
+   7              avg gpa REAL        0       None   0
+   8       Only batch gpa REAL        0       None   0
+
+2_batch_AIML_Results
+
+ cid                   name type  notnull dflt_value  pk
+   0                  regno TEXT        0       None   0
+   1                   name TEXT        0       None   0
+   2               semester TEXT        0       None   0
+   3         APRIL 2023 gpa REAL        0       None   0
+   4        AUGUST 2023 gpa REAL        0       None   0
+   5    NOVEMBER - 2023 gpa REAL        0       None   0
+   6       MARCH - 2024 gpa REAL        0       None   0
+   7      AUGUST - 2024 gpa REAL        0       None   0
+   8        AUGUST 2024 gpa REAL        0       None   0
+   9 MARCH/APRIL - 2025 gpa REAL        0       None   0
+  10                avg gpa REAL        0       None   0
+
+2_batch_AIDS_Results
+
+ cid                   name type  notnull dflt_value  pk
+   0                  regno TEXT        0       None   0
+   1                   name TEXT        0       None   0
+   2               semester TEXT        0       None   0
+   3         APRIL 2023 gpa REAL        0       None   0
+   4        AUGUST 2023 gpa REAL        0       None   0
+   5    NOVEMBER - 2023 gpa REAL        0       None   0
+   6       MARCH - 2024 gpa REAL        0       None   0
+   7      AUGUST - 2024 gpa REAL        0       None   0
+   8        AUGUST 2024 gpa REAL        0       None   0
+   9 MARCH/APRIL - 2025 gpa REAL        0       None   0
+  10                avg gpa REAL        0       None   0
+  11         Only batch gpa REAL        0       None   0
+
+2_batch_CSD_Results
+
+ cid                   name type  notnull dflt_value  pk
+   0                  regno TEXT        0       None   0
+   1                   name TEXT        0       None   0
+   2               semester TEXT        0       None   0
+   3         APRIL 2023 gpa REAL        0       None   0
+   4        AUGUST 2023 gpa REAL        0       None   0
+   5    NOVEMBER - 2023 gpa REAL        0       None   0
+   6       MARCH - 2024 gpa REAL        0       None   0
+   7      AUGUST - 2024 gpa REAL        0       None   0
+   8        AUGUST 2024 gpa REAL        0       None   0
+   9 MARCH/APRIL - 2025 gpa REAL        0       None   0
+  10                avg gpa REAL        0       None   0
+  11         Only batch gpa REAL        0       None   0
+
+1_batch_CSD_Results
+ cid                   name type  notnull dflt_value  pk
+   0                  regno TEXT        0       None   0
+   1                   name TEXT        0       None   0
+   2               semester TEXT        0       None   0
+   3          JUNE 2022 gpa REAL        0       None   0
+   4     SEPTEMBER 2022 gpa REAL        0       None   0
+   5      NOVEMBER 2022 gpa REAL        0       None   0
+   6         APRIL 2023 gpa REAL        0       None   0
+   7    NOVEMBER - 2023 gpa REAL        0       None   0
+   8       MARCH - 2024 gpa REAL        0       None   0
+   9      AUGUST - 2024 gpa REAL        0       None   0
+  10 MARCH/APRIL - 2025 gpa REAL        0       None   0
+  11          JUNE 2025 gpa REAL        0       None   0
+  12                avg gpa REAL        0       None   0
+  13         Only batch gpa REAL        0       None   0
+
+1_batch_AIML_Results
+ cid                   name type  notnull dflt_value  pk
+   0                  regno TEXT        0       None   0
+   1                   name TEXT        0       None   0
+   2               semester TEXT        0       None   0
+   3          JUNE 2022 gpa REAL        0       None   0
+   4     SEPTEMBER 2022 gpa REAL        0       None   0
+   5      NOVEMBER 2022 gpa REAL        0       None   0
+   6         APRIL 2023 gpa REAL        0       None   0
+   7    NOVEMBER - 2023 gpa REAL        0       None   0
+   8       MARCH - 2024 gpa REAL        0       None   0
+   9      AUGUST - 2024 gpa REAL        0       None   0
+  10 MARCH/APRIL - 2025 gpa REAL        0       None   0
+  11          JUNE 2025 gpa REAL        0       None   0
+  12                avg gpa REAL        0       None   0
+  13         Only batch gpa REAL        0       None   0
+
+1_batch_AIDS_Results
+ cid                   name type  notnull dflt_value  pk
+   0                  regno TEXT        0       None   0
+   1                   name TEXT        0       None   0
+   2               semester TEXT        0       None   0
+   3          JUNE 2022 gpa REAL        0       None   0
+   4     SEPTEMBER 2022 gpa REAL        0       None   0
+   5      NOVEMBER 2022 gpa REAL        0       None   0
+   6         APRIL 2023 gpa REAL        0       None   0
+   7    NOVEMBER - 2023 gpa REAL        0       None   0
+   8       MARCH - 2024 gpa REAL        0       None   0
+   9      AUGUST - 2024 gpa REAL        0       None   0
+  10 MARCH/APRIL - 2025 gpa REAL        0       None   0
+  11          JUNE 2025 gpa REAL        0       None   0
+  12                avg gpa REAL        0       None   0
