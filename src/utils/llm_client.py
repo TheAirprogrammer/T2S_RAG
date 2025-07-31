@@ -5,7 +5,8 @@ import logging
 import time
 import pickle
 import os
-import re  
+import re
+import requests
 from google.api_core import retry
 from google.api_core.exceptions import ResourceExhausted, DeadlineExceeded, ServiceUnavailable
 from google.api_core.timeout import ConstantTimeout
@@ -32,67 +33,6 @@ def init_gemini_client(config_path):
         logger.error(f"Failed to initialize Gemini client: {e}")
         raise
 
-@retry.Retry(
-    predicate=retry.if_exception_type(ResourceExhausted, DeadlineExceeded, ServiceUnavailable),
-    initial=60,
-    maximum=600,
-    multiplier=2,
-    deadline=300  # Total retry period: 5 minutes
-)
-def get_table_name_and_alter(client, nl_text):
-    """Extract table name and detect ALTER command from NL text in JSON format."""
-    cache_file = f"cache/{nl_text.replace(' ', '_')}.pkl"
-    if os.path.exists(cache_file):
-        with open(cache_file, 'rb') as f:
-            logger.info(f"Loaded cached response for: {nl_text}")
-            return pickle.load(f)
-
-    logger.info(f"Calling Gemini API for query: {nl_text}")
-    prompt = f"""
-    Given the natural language query: "{nl_text}"
-    1. Identify the database table name referenced in the query.Note that a reference query may have one or table name specified.
-    2. Determine if the query involves an ALTER TABLE command (e.g., adding, modifying, or dropping a column).
-    Return a JSON object with:
-    - 'table_name': the table name as a string, or 'UNCERTAIN' if unclear.
-    - 'is_alter': boolean indicating if an ALTER command is present.
-    - 'alter_command': the SQL ALTER TABLE command if applicable, otherwise empty string.
-    Example:
-    -For "How many employees are present in department DataScience, economics and logistics":
-        {{"table_name": "DataScience, economics, logistics","is_alter": false, "alter_command": "" }}
-    - For "How many employees are present where salary is above 50 lkh":
-      {{"table_name": "Employee", "is_alter": false, "alter_command": ""}}
-    - For "give me the schema of the table ShipMethod":
-      {{"table_name": "ShipMethod", "is_alter": false, "alter_command": ""}}
-    - For "Alter the Employee table to add a Bonus column":
-      {{"table_name": "Employee", "is_alter": true, "alter_command": "ALTER TABLE Employee ADD Bonus DECIMAL"}}
-    """
-    try:
-        # with ConstantTimeout(timeout=30):  # 30-second timeout
-        response = client.generate_content(prompt)
-        logger.info(f"Received Gemini response: {response.text[:100]}...")
-        # Clean response
-        response_text = response.text.strip()
-        if response_text.startswith('``````'):
-            response_text = response_text[7:-3].strip()
-        result = json.loads(response_text)
-        if not all(key in result for key in ['table_name', 'is_alter', 'alter_command']):
-            logger.warning(f"Invalid JSON response: {response.text}")
-            return {"table_name": "UNCERTAIN", "is_alter": False, "alter_command": ""}
-        logger.info(f"Extracted table info: {result}")
-        # Cache result
-        os.makedirs("cache", exist_ok=True)
-        with open(cache_file, 'wb') as f:
-            pickle.dump(result, f)
-        return result
-    except json.JSONDecodeError as e:
-        logger.warning(f"Failed to parse Gemini response: {response.text}, Error: {e}")
-        return {"table_name": "UNCERTAIN", "is_alter": False, "alter_command": ""}
-    except Exception as e:
-        logger.error(f"Error calling Gemini API: {e}")
-        raise
-
-# Add this function to the existing file
-
 def find_relevant_tables_from_entities(client, nl_text, entities):
     """Enhanced function to analyze entities and suggest relevant table names."""
     cache_file = f"cache/entities_{hash(nl_text + str(entities))}.pkl"
@@ -103,24 +43,29 @@ def find_relevant_tables_from_entities(client, nl_text, entities):
 
     logger.info(f"Analyzing entities for table suggestions: {entities}")
     prompt = f"""
+    Database Context: Custom SQLite database for student exam results with 9 tables grouped by batch (1_batch, 2_batch, 3_batch) and branch (AIML, CSD, AIDS). Table names: 1_batch_AIML_Results, 1_batch_CSD_Results, 1_batch_AIDS_Results, 2_batch_AIML_Results, 2_batch_CSD_Results, 2_batch_AIDS_Results, 3_batch_AIML_Results, 3_batch_CSD_Results, 3_batch_AIDS_Results.
+    - Common columns: 'regno' (TEXT, primary key), 'name' (TEXT), 'semester' (TEXT), 'avg gpa' (REAL).
+    - Exam columns: GPAs as REAL (e.g., 'DECEMBER - 2023 gpa'). Suggest tables based on batch/branch mentions or exam periods.
+    - Supplementary exams: Infer tables for recovery GPAs (e.g., 'NOVEMBER 2023 gpa' suggests 1st/2nd batch tables).
+    - Gold medal: Related to 'avg gpa' > 9.00.
+
     Given the natural language query: "{nl_text}"
     And extracted entities: {entities}
     
     Analyze what database tables might be relevant based on these entities and the query context.
-    Consider common database naming patterns and relationships.
+    Consider batch, branch, exam periods, and common naming patterns.
     
     Return a JSON object with:
-    - 'suggested_tables': list of likely table names that might contain these entities
+    - 'suggested_tables': list of likely table names (e.g., '2_batch_AIML_Results')
     - 'confidence': confidence score (0-1) for each suggestion
     - 'reasoning': why each table might be relevant
     
     Example:
-    For query "What is the card Number of Customer ID 20002" with entities ["card Number", "Customer ID"]:
+    For query "Students with high GPA in 2nd batch AIML" with entities ["high GPA", "2nd batch", "AIML"]:
     {{
         "suggested_tables": [
-            {{"name": "CreditCard", "confidence": 0.9, "reasoning": "Contains card-related information"}},
-            {{"name": "CustomerCard", "confidence": 0.85, "reasoning": "Links customers to their cards"}},
-            {{"name": "Payment", "confidence": 0.7, "reasoning": "Might store payment card details"}}
+            {{"name": "2_batch_AIML_Results", "confidence": 0.95, "reasoning": "Matches batch and branch, contains 'avg gpa'"}},
+            {{"name": "2_batch_CSD_Results", "confidence": 0.4, "reasoning": "Same batch but different branch"}}
         ]
     }}
     """
@@ -177,52 +122,69 @@ def get_table_name_and_alter(client, nl_text):
 
     logger.info(f"Calling Gemini API for enhanced query analysis: {nl_text}")
     prompt = f"""
+    Database Context: This is a custom SQLite database for student exam results with 9 tables grouped by batch (1_batch, 2_batch, 3_batch) and branch (AIML, CSD, AIDS). Table names: 1_batch_AIML_Results, 1_batch_CSD_Results, 1_batch_AIDS_Results, 2_batch_AIML_Results, 2_batch_CSD_Results, 2_batch_AIDS_Results, 3_batch_AIML_Results, 3_batch_CSD_Results, 3_batch_AIDS_Results.
+    - Common columns across tables: 'regno' (TEXT, primary key), 'name' (TEXT), 'semester' (TEXT), 'avg gpa' (REAL).
+    - Other columns are GPA for specific exam periods (e.g., 'DECEMBER - 2023 gpa' as REAL). Column names may have spaces and use double quotes in SQL.
+    - Supplementary exams: 'NOVEMBER 2022 gpa'/'NOVEMBER 2023 gpa' for 1st batch, 'NOVEMBER 2023 gpa'/'AUGUST 2024 gpa' for 2nd batch, 'AUGUST 2024 gpa' for 3rd batch. Missing regular GPA implies failure; supplementary GPA shows recovery.
+    - Gold medal: 'avg gpa' > 9.00.
+    - Queries may imply multiple tables (e.g., compare batches) or filters on GPA, supplementary status, or gold medals.
+
     Given the natural language query: "{nl_text}"
     
-    Perform comprehensive analysis:
-    1. Identify the database table name referenced (exact match preferred, or 'UNCERTAIN' if unclear)
-    2. Extract key entities/attributes mentioned (column names, values, etc.)
-    3. Determine the SQL command type (SELECT, INSERT, UPDATE, DELETE, ALTER, CREATE, DROP, etc.)
-    4. Check if it's an ALTER/modification command
-    5. Generate the SQL command if it's an ALTER operation
-    
+    Perform comprehensive analysis using the database context:
+    1. Identify the database table name(s) referenced (exact match preferred, or infer from batch/branch/exam mentions; list multiple as comma-separated if query implies joins; use 'UNCERTAIN' if unclear).
+    2. Extract key entities/attributes mentioned (column names like 'avg gpa', values like '9.00', exam periods, batches, branches).
+    3. Determine the SQL command type (SELECT, INSERT, UPDATE, DELETE, ALTER, CREATE, DROP, etc.), considering filters like GPA > 9.00 for gold medals or supplementary logic.
+    4. Check if it's an ALTER/modification command.
+    5. Generate the SQL command if it's an ALTER operation (SQLite-compatible, e.g., ALTER TABLE "table_name" ADD COLUMN ...).
+
     Return a JSON object with:
-    - 'table_name': exact table name or 'UNCERTAIN'
-    - 'extracted_entities': list of column names, attributes, or key terms mentioned
+    - 'table_name': exact table name(s) as string (comma-separated if multiple) or 'UNCERTAIN'
+    - 'extracted_entities': list of column names, attributes, or key terms mentioned (e.g., ['avg gpa', 'AUGUST 2024 gpa', 'gold medal'])
     - 'sql_command_type': the primary SQL operation type
     - 'is_alter': boolean for structural modifications
-    - 'alter_command': SQL ALTER statement if applicable
+    - 'alter_command': SQL ALTER statement if applicable (SQLite-compatible)
     - 'confidence': confidence score (0-1) for table identification
     
     Examples:
-    For "What is the card Number of Customer ID 20002":
+    For "Get students with avg gpa > 9.00 in 2nd batch AIML for gold medal":
     {{
-        "table_name": "UNCERTAIN",
-        "extracted_entities": ["card Number", "Customer ID", "20002"],
+        "table_name": "2_batch_AIML_Results",
+        "extracted_entities": ["avg gpa", "gold medal", "2nd batch", "AIML"],
         "sql_command_type": "SELECT",
         "is_alter": false,
         "alter_command": "",
-        "confidence": 0.3
-    }}
-    
-    For "Add a new column called bonus to Employee table":
-    {{
-        "table_name": "Employee",
-        "extracted_entities": ["bonus", "column"],
-        "sql_command_type": "ALTER",
-        "is_alter": true,
-        "alter_command": "ALTER TABLE Employee ADD COLUMN bonus DECIMAL",
         "confidence": 0.95
     }}
     
-    For "give me the schema of the table ShipMethod":
+    For "Compare avg gpa between 1st batch CSD and 3rd batch AIDS":
     {{
-        "table_name": "ShipMethod",
-        "extracted_entities": ["schema"],
-        "sql_command_type": "DESCRIBE",
+        "table_name": "1_batch_CSD_Results,3_batch_AIDS_Results",
+        "extracted_entities": ["avg gpa", "1st batch", "CSD", "3rd batch", "AIDS"],
+        "sql_command_type": "SELECT",
         "is_alter": false,
         "alter_command": "",
-        "confidence": 1.0
+        "confidence": 0.8
+    }}
+    
+    For "Add a column for notes in 3_batch_AIML_Results":
+    {{
+        "table_name": "3_batch_AIML_Results",
+        "extracted_entities": ["notes", "column"],
+        "sql_command_type": "ALTER",
+        "is_alter": true,
+        "alter_command": "ALTER TABLE \"3_batch_AIML_Results\" ADD COLUMN notes TEXT",
+        "confidence": 0.95
+    }}
+    
+    For "Get names with missing regular GPA but passed supplementary in November 2023 for 2nd batch":
+    {{
+        "table_name": "2_batch_AIML_Results,2_batch_CSD_Results,2_batch_AIDS_Results",
+        "extracted_entities": ["name", "NOVEMBER 2023 gpa", "supplementary", "2nd batch"],
+        "sql_command_type": "SELECT",
+        "is_alter": false,
+        "alter_command": "",
+        "confidence": 0.7
     }}
     """
     
@@ -291,20 +253,23 @@ def get_table_name_and_alter(client, nl_text):
     except Exception as e:
         logger.error(f"Error calling enhanced Gemini API: {e}")
         raise
-import requests  # Add this import at the top if not present
 
 # New function for initializing Codestral client
 def init_codestral_client(config_path):
     config = load_config(config_path)
     try:
         api_key = config['mistral']['api_key']
+        if not api_key or api_key == "your_mistral_codestral_api_key_here":
+            raise ValueError("Mistral API key not configured properly")
         logger.info("Initialized Codestral client")
         return api_key
+    except KeyError:
+        logger.error("Mistral API key not found in config")
+        raise ValueError("Mistral API key not found in config. Please add 'mistral: api_key: your_key' to settings.yaml")
     except Exception as e:
         logger.error(f"Failed to initialize Codestral client: {e}")
         raise
 
-# New function to generate SQL using Codestral
 @retry.Retry(
     predicate=retry.if_exception_type(DeadlineExceeded, ServiceUnavailable),
     initial=60,
@@ -322,18 +287,39 @@ def generate_sql_with_codestral(api_key, nl_text, schema, sql_command_type, extr
 
     logger.info(f"Calling Codestral API for SQL generation: {nl_text}")
     prompt = f"""
+    Database Context: Custom SQLite database for student exam results with tables by batch (1_batch, 2_batch, 3_batch) and branch (AIML, CSD, AIDS). Tables: 1_batch_AIML_Results, 1_batch_CSD_Results, 1_batch_AIDS_Results, 2_batch_AIML_Results, 2_batch_CSD_Results, 2_batch_AIDS_Results, 3_batch_AIML_Results, 3_batch_CSD_Results, 3_batch_AIDS_Results.
+    - Common columns: "regno" (TEXT, primary key), "name" (TEXT), "semester" (TEXT), "avg gpa" (REAL).
+    - Exam columns: GPAs as REAL (e.g., "DECEMBER - 2023 gpa"). Use double quotes for columns with spaces (e.g., "AUGUST - 2024 gpa").
+    - Supplementary exams: "NOVEMBER 2022 gpa"/"NOVEMBER 2023 gpa" for 1st batch, "NOVEMBER 2023 gpa"/"AUGUST 2024 gpa" for 2nd batch, "AUGUST 2024 gpa" for 3rd batch. Missing regular GPA means failure (backlog); use IS NULL for missing and >0 for passed supplementary.
+    - Gold medal: WHERE "avg gpa" > 9.00.
+    - For queries about all batches/branches (e.g., "all candidates"), include ALL relevant tables with UNION or joins on "regno". Be concise: group by batch if possible.
+
     Given the natural language query: "{nl_text}"
     Detected command type: {sql_command_type}
     Relevant entities: {', '.join(extracted_entities)}
     Table schema:
     {schema}
     
-    Generate a valid SQL query that matches the query intent. Use the exact column and table names from the schema. 
-    If it's a SELECT, include appropriate WHERE clauses. Do not execute; just return the SQL string.
-    For complex queries, consider joins if multiple tables are in the schema.
-    Output only the SQL query in a code block.
+    Generate a valid, executable SQLite3 SQL query that matches the query intent:
+    - Use exact table/column names from schema (double-quote columns with spaces, e.g., "AUGUST - 2024 gpa").
+    - For SELECT, include WHERE for filters (e.g., "avg gpa" > 9.00 for gold medals, IS NULL for missing regular GPA indicating backlogs).
+    - Handle backlog/supplementary logic: Check IS NULL on regular exam columns to detect backlogs; if query is global, union across all batches.
+    - Use UNION or joins if multiple tables (e.g., INNER JOIN on "regno" for comparisons, UNION for combining results from all batches).
+    - Keep queries concise: Avoid listing every column manually if not needed; use * if appropriate, but prefer specific columns.
+    - For backlogs: Identify candidates with any IS NULL in regular GPA columns (indicating failure/backlog).
+    - Output ONLY the complete SQL query string (must end with ';'), no explanations, code blocks, or partial queries. Ensure it's valid SQLite3 syntax and not truncated.
+    
+    Examples (output only the SQL):
+    For "Get gold medal eligible students in 2nd batch AIML":
+    SELECT "name", "avg gpa" FROM "2_batch_AIML_Results" WHERE "avg gpa" > 9.00;
+    
+    For "Students who failed regular but passed supplementary in November 2023 for 2nd batch CSD":
+    SELECT "name" FROM "2_batch_CSD_Results" WHERE "APRIL 2023 gpa" IS NULL AND "NOVEMBER 2023 gpa" > 0;
+    
+    For "Get all candidates with backlogs across all batches":
+    SELECT "regno", "name" FROM "1_batch_AIML_Results" WHERE "JUNE 2022 gpa" IS NULL OR "SEPTEMBER 2022 gpa" IS NULL -- (shortened for example)
+    UNION SELECT "regno", "name" FROM "1_batch_CSD_Results" WHERE ... -- continue for all tables;
     """
-
     try:
         response = requests.post(
             "https://api.mistral.ai/v1/chat/completions",  # Codestral endpoint
@@ -341,16 +327,40 @@ def generate_sql_with_codestral(api_key, nl_text, schema, sql_command_type, extr
             json={
                 "model": "codestral-latest",
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 500,
-                "temperature": 0.2
-            }
+                "max_tokens": 1500,  # Increased to handle longer queries
+                "temperature": 0.1  # Lower for more deterministic output
+            },
+            timeout=60  # Increased timeout for complex generations
         )
         response.raise_for_status()
         result = response.json()["choices"][0]["message"]["content"].strip()
         
-        # Extract SQL from code block if present
-        sql_match = re.search(r'``````', result, re.DOTALL)
-        sql_query = sql_match.group(1).strip() if sql_match else result
+        # Robust extraction: Capture everything after the first code block or assume raw SQL
+        sql_match = re.search(r'``````', result, re.DOTALL | re.IGNORECASE)
+        if sql_match:
+            sql_query = sql_match.group(1).strip()
+        else:
+            # Fallback: Take the entire response, split by lines, and join until ';' is found
+            lines = result.split('\n')
+            sql_lines = []
+            for line in lines:
+                stripped = line.strip()
+                if stripped:
+                    sql_lines.append(stripped)
+                if ';' in stripped:
+                    break
+            sql_query = ' '.join(sql_lines).strip()
+        
+        # Ensure it ends with ';'
+        if not sql_query.endswith(';'):
+            sql_query += ';'
+        
+        # Validation: Check for truncation (heuristic: count expected unions for all-batch queries)
+        expected_unions = 8  # 9 tables - 1 = 8 UNIONs
+        union_count = sql_query.upper().count('UNION')
+        if 'UNION' in sql_query.upper() and union_count < expected_unions:
+            logger.warning(f"Generated SQL may be truncated (found {union_count} UNIONs, expected ~{expected_unions})")
+            sql_query += ' -- Warning: Query incomplete, add remaining tables manually'
         
         # Cache result
         os.makedirs("cache", exist_ok=True)
