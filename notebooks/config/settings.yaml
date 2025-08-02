@@ -1,5 +1,0 @@
-batch_size: 10
-collection_name: adventureworks_schema
-db_path: data/adventureworks_exported.db
-embedding_model: all-mpnet-base-v2
-persist_dir: vector_store/adventureworks/chroma_data

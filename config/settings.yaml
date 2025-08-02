@@ -1,8 +1,9 @@
 gemini:
   api_key: "AIzaSyDHcvphByso6-vFz79UmBamIbpZpcXmSZU"
 mistral:
-  #api_key: "pzXNoFS8HZJ2VJl0NK4Ephu3OQecyFmT"
   api_key: "cehfmCSaiIZPWbWHfPlb9hkjYYVGBPAn"
+deepseek:
+  api_key: "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"
   
 # db_path: data/adventureworks_exported.db
 # persist_dir: vector_store/adventureworks/chroma_data

@@ -13,3 +13,7 @@ class AgentState(TypedDict):
     sql_command_type: str  # SELECT, INSERT, UPDATE, DELETE, etc.
     extracted_entities: List[str]  # Entities found in NL text
     generated_sql: str  # Add this field for SQL generation
+    query_results: List[dict]
+    final_sql: str
+    retry_count: int
+    current_max_tokens: int

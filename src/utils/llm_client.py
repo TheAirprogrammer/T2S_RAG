@@ -371,3 +371,115 @@ def generate_sql_with_codestral(api_key, nl_text, schema, sql_command_type, extr
     except Exception as e:
         logger.error(f"Error calling Codestral API: {e}")
         return "SELECT * FROM table -- Error generating SQL"
+
+def init_deepseek_client(config_path):
+    config = load_config(config_path)
+    try:
+        api_key = config['deepseek']['api_key']
+        if not api_key:
+            raise ValueError("DeepSeek API key not configured")
+        logger.info("Initialized DeepSeek client")
+        return api_key
+    except Exception as e:
+        logger.error(f"Failed to initialize DeepSeek client: {e}")
+        raise
+
+# Helper to clean markdown from generated SQL
+def clean_sql(sql):
+    sql = sql.strip()
+    # Remove any leading ``` or ```sql fences
+    sql = re.sub(r'^```(?:sql)?\s*', '', sql, flags=re.IGNORECASE).strip()
+    # Remove any trailing ``` fence
+    sql = re.sub(r'```$', '', sql).strip()
+    return sql
+
+# New function to verify/correct SQL using DeepSeek R1
+@retry.Retry(
+    predicate=retry.if_exception_type(DeadlineExceeded, ServiceUnavailable),
+    initial=60,
+    maximum=600,
+    multiplier=2,
+    deadline=300
+)
+def verify_sql_with_deepseek(api_key, nl_text, generated_sql, schema, sql_command_type):
+    """Verify and correct SQL query using DeepSeek R1 API."""
+    cache_file = f"cache/verify_{hash(nl_text + generated_sql)}.pkl"
+    if os.path.exists(cache_file):
+        with open(cache_file, 'rb') as f:
+            logger.info(f"Loaded cached verification for: {nl_text}")
+            return pickle.load(f)
+
+    logger.info(f"Calling DeepSeek API for SQL verification: {nl_text}")
+    cleaned_sql = clean_sql(generated_sql)  # Clean markdown before sending
+    prompt = f"""
+    Database Context: Custom SQLite database with student results tables (e.g., 1_batch_AIML_Results). Use double quotes for spaced columns.
+    Schema: {schema}
+
+    Natural Language Query: "{nl_text}"
+    Command Type: {sql_command_type}
+    Generated SQL: {cleaned_sql}
+
+    Task: Verify if this SQL satisfies the query intent and is valid SQLite3 syntax.
+    - If perfect, return JSON: {{"status": "perfect", "corrected_sql": "{cleaned_sql}"}}
+    - If small syntax error, correct it and return: {{"status": "corrected", "corrected_sql": "fixed_query"}}
+    - If incomplete/truncated (e.g., missing parts, cutoff), return: {{"status": "incomplete", "corrected_sql": ""}} (we'll re-generate)
+    - Output ONLY valid JSON, no extra text.
+    """
+
+    try:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": "deepseek/deepseek-r1-0528:free",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 3500,
+                "temperature": 0.3
+            },
+            timeout=30
+        )
+        # response.raise_for_status()
+        # logger.info(f"DeepSeek API response status: {response.status_code}")
+        # # Parse
+        # json_data = response.json()
+        response.raise_for_status()
+        # DEBUG: dump raw HTTP response for inspection
+        logger.info(f"DeepSeek raw HTTP status: {response.status_code}")
+        logger.info(f"DeepSeek raw response body:\n{response.text}")
+        # now try to parse it
+        json_data = response.json()
+        result_content = json_data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+        
+        if not result_content:
+            logger.warning("Empty content in DeepSeek response")
+            return {"status": "error", "corrected_sql": cleaned_sql}
+        
+        # Robust JSON extraction
+        try:
+            result = json.loads(result_content)
+        except json.JSONDecodeError:
+            logger.warning("Invalid JSON in DeepSeek response; attempting fallback extraction")
+            json_match = re.search(r'\{[\s\S]*\}', result_content, re.DOTALL)
+            if json_match:
+                try:
+                    result = json.loads(json_match.group(0))
+                except json.JSONDecodeError:
+                    result = {"status": "error", "corrected_sql": cleaned_sql}
+            else:
+                result = {"status": "error", "corrected_sql": cleaned_sql}
+
+        # Cache result
+        os.makedirs("cache", exist_ok=True)
+        with open(cache_file, 'wb') as f:
+            pickle.dump(result, f)
+        
+        return result
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"DeepSeek API HTTP error: {e.response.status_code} - {e.response.text}")
+        return {"status": "error", "corrected_sql": generated_sql}
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parsing error in DeepSeek response: {e}")
+        return {"status": "error", "corrected_sql": generated_sql}
+    except Exception as e:
+        logger.error(f"Error calling DeepSeek API: {e}")
+        return {"status": "error", "corrected_sql": generated_sql}

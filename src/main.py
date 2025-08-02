@@ -42,6 +42,13 @@ def main():
         except Exception as e:
             print(f"\n❌ Error: {e}")
             continue
+        print(f"\n🛠️ Final SQL Query:\n{result.get('final_sql', 'No SQL finalized')}")
+        print(f"\n📊 Query Results:")
+        if result.get('query_results'):
+            for row in result['query_results']:
+                print(row)
+        else:
+            print("No results or error occurred")
 
 if __name__ == "__main__":
     main()
