@@ -327,7 +327,7 @@ def generate_sql_with_codestral(api_key, nl_text, schema, sql_command_type, extr
             json={
                 "model": "codestral-latest",
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 1500,  # Increased to handle longer queries
+                "max_tokens": 15000,  # Increased to handle longer queries
                 "temperature": 0.1  # Lower for more deterministic output
             },
             timeout=60  # Increased timeout for complex generations
@@ -433,7 +433,7 @@ def verify_sql_with_deepseek(api_key, nl_text, generated_sql, schema, sql_comman
             json={
                 "model": "deepseek/deepseek-r1-0528:free",
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 3500,
+                "max_tokens": 15000,
                 "temperature": 0.3
             },
             timeout=30
