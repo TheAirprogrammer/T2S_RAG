@@ -1,0 +1,5 @@
+The prompts that are given must be changed for all the 3 agents that can handle the understanding
+of the Register number attribute in the results database.
+Currently, the sql_query_generator is generating the query with respect to the register number 
+with capital letter in the regnumber ie, 22SEAD53. But the prompt must be changed to generate the query
+so that the sql query is generated as 22sead53 as per the database.
