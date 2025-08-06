@@ -292,6 +292,7 @@ def generate_sql_with_codestral(api_key, nl_text, schema, sql_command_type, extr
     - Exam columns: GPAs as REAL (e.g., "DECEMBER - 2023 gpa"). Use double quotes for columns with spaces (e.g., "AUGUST - 2024 gpa").
     - Supplementary exams: "NOVEMBER 2022 gpa"/"NOVEMBER 2023 gpa" for 1st batch, "NOVEMBER 2023 gpa"/"AUGUST 2024 gpa" for 2nd batch, "AUGUST 2024 gpa" for 3rd batch. Missing regular GPA means failure (backlog); use IS NULL for missing and >0 for passed supplementary.
     - Gold medal: WHERE "avg gpa" > 9.00.
+    - Register numbers of the candidates are in the format **se(ad||ai||cd)***. where the se(ad||ai||cd) are in the lower case. Example register number: 22sead53. Note that while query generation, register number is generated in this format.
     - For queries about all batches/branches (e.g., "all candidates"), include ALL relevant tables with UNION or joins on "regno". Be concise: group by batch if possible.
 
     Given the natural language query: "{nl_text}"
