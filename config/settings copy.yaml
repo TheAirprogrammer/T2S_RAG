@@ -1,0 +1,12 @@
+gemini:
+  api_key: "api key from gemini"
+mistral:
+  api_key: "api key from codestral"
+deepseek:
+  api_key: "api key from deep-seek"
+  
+db_path: "data/Results.db"
+persist_dir: "vector_store/Results/chroma_data"
+collection_name: "Results_schema"
+embedding_model: "all-mpnet-base-v2"
+batch_size: 10
