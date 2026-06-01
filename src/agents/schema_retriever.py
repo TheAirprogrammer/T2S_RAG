@@ -205,6 +205,7 @@ def should_continue(state: AgentState):
             retry_count = 0
     
     if retry_count > 0:
+        state["generated_sql"] = ""
         return "sql_query_generator"
     
     if state.get("query_results"):
@@ -238,7 +239,6 @@ def build_graph():
     graph.add_conditional_edges("action", should_continue)
     graph.add_conditional_edges("sql_query_generator", should_continue)
     graph.add_conditional_edges("data_operator", should_continue)
-    graph.add_edge("sql_query_generator", "data_operator")
     
     return graph.compile()
 
